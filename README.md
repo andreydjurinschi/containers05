@@ -109,6 +109,84 @@ stderr_logfile=/proc/self/fd/2
 user=mysql
 ```
 
+6. Работа с Dockerfile
+```Docker
+FROM debian:latest
+
+RUN apt-get update && \
+    apt-get install -y apache2 php libapache2-mod-php php-mysql mariadb-server supervisor wget && \
+    apt-get clean
+
+VOLUME /var/lib/mysql
+VOLUME /var/log
+
+ADD https://wordpress.org/latest.tar.gz /var/www/html/
+
+COPY files/apache2/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY files/apache2/apache2.conf /etc/apache2/apache2.conf
+COPY files/php/php.ini /etc/php/8.2/apache2/php.ini
+COPY files/mariadb/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY files/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+
+RUN mkdir /var/run/mysqld && chown mysql:mysql /var/run/mysqld
+
+EXPOSE 80
+
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
+
+```
+
+- изменив по презентации лабораторной работы наш докер файл, я добавил тома для сохранения данных БД даже при удалении контейнера.
+
+- далее скачиваем wordpress и копируем в указанное место
+
+- так же копируем конфигурационные файлы с хоста в контейнер, создаем директорию для Mysql и устанавливаем на нее права
+
+- открываем порт
+
+- и наконец запускаем созданный supervisor, используя конфиг, представленный выше
+
+6. Запуск и настройка бд
+
+сразу же получаю ошибку - переименовываю файл и повторяю запск контейнера
+![](https://i.imgur.com/IuGskOE.png)
+
+опа, запустили
+![](https://i.imgur.com/prIZWbn.png)
+
+проверяем нужные файлы
+![](https://i.imgur.com/0tGhdel.png)
+
+так же проверим файл конфигурации апаче
+![](https://i.imgur.com/ZkqeKL6.png)
+
+
+После настройки БД, нужно распаковать архив с вордпрессом:
+
+![](https://i.imgur.com/5zDmqX0.png)
+
+переходим на localhost
+![](https://i.imgur.com/oVSwoZr.png)
+опача
+
+копируем содиржимое файла корнфигурации в файл files/wp-config.php
+
+![](https://i.imgur.com/S2uvoN0.png)
+
+добавляем нужные строки в докер файл (копируем конфиг вордпресса) и пересобираем контейнер
+
+остановили -> удалили -> создали образ -> запустили
+
+
+
+
+
+
+
+
+
+
+
 
 
 
